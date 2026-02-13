@@ -1,5 +1,9 @@
-# streamlit_app.py
+
+# frontend.py
 import streamlit as st
+import requests
+
+API_URL = "http://127.0.0.1:8000/predict"  # FastAPI backend URL
 
 st.set_page_config(
     page_title="Next Word Predictor by Nadish",
@@ -13,30 +17,16 @@ st.markdown("---")
 
 user_input = st.text_area("Enter your text here:", placeholder="Type a sentence...", height=100)
 
-def predict_next_word(text):
-    """
-    Simple dummy next-word prediction function.
-    Replace this with your model's logic or ML inference.
-    """
-    words = text.split()
-    if not words:
-        return ""
-    last_word = words[-1]
-    # Example: just return 'example' for demonstration
-    # Replace with your trained model's prediction logic
-    return last_word[::-1]  # Just reversing last word as dummy prediction
-
 if st.button("Predict Next Word"):
     if user_input.strip() == "":
         st.warning("Please enter some text!")
     else:
+        # Call FastAPI endpoint
         try:
-            predicted_word = predict_next_word(user_input)
+            response = requests.post(API_URL, json={"text": user_input})
+            predicted_word = response.json().get("next_word", "")
             st.success(f"Predicted next word: **{predicted_word}**")
         except Exception as e:
-            st.error(f"Error predicting next word: {e}")
+            st.error(f"Error calling API: {e}")
 
-st.markdown(
-    "<div style='text-align:center; margin-top:50px;'><p style='color:gray;'>Assignment Demo using Streamlit (no external API)</p></div>",
-    unsafe_allow_html=True
-)
+st.markdown("<div style='text-align:center; margin-top:50px;'><p style='color:gray;'>Assignment Demo using FastAPI + Streamlit</p></div>", unsafe_allow_html=True)
